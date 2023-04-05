@@ -1,0 +1,35 @@
+<div class="nav justify-content-center align-middle" style="background-color: #212529 !important; height: 6rem !important;">
+  <ul class="nav justify-content-center grey lighten-4 py-4">
+    <li class="nav-item">
+      <a class="nav-link active" href="#" routerLink="/home" style="color: ghostwhite;">
+        <img src="../../assets/images/rh-logo.png" width="100px" class="d-inline-block align-middle" alt="">
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#!"  *ngIf="this.isUserAuthenticated()" (click)="logout()" >        
+          Logout        
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#!" *ngIf="!this.isUserAuthenticated()" (click)="authenticateUser()" >
+        Login
+      </a>
+      
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#!"  *ngIf="this.isUserAuthenticated()" routerLink="/categories">        
+          View Categories
+      </a>
+    </li>
+  </ul>
+</div>
+
+  
+
+
+
+<div class="container p-0">
+  <img src="../../assets/images/banner.png" class="img-fluid" style="width: 120%">
+
+</div>
+

@@ -1,0 +1,9 @@
+.categoryList {
+
+    border: 1px solid rgba(0,0,0,.125) !important;
+    margin-bottom: 30px !important;
+    height: 60px !important;
+    background-color: #719063 ;
+    color: aliceblue !important;
+    cursor: pointer;
+}
