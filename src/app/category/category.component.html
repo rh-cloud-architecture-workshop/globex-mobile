@@ -1,0 +1,17 @@
+<div class="card" style="margin-top: 40px;">
+  <div class="card-header">
+    <div class="h4 "> Choose a category</div>
+  </div>
+  <div class="card-body">
+
+    
+ <ul class="list-group">
+    <li class="list-group-item categoryList"   *ngFor="let category of this.categoriesList" routerLink="/products/{{category.category}}">
+        {{category.category}}
+    </li>
+    
+  </ul>
+
+
+  </div>
+</div>

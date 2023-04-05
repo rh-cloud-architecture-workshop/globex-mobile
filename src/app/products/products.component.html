@@ -1,0 +1,40 @@
+<div class="card"  *ngIf="products?.length > 0" >
+  <div class="card-body">
+    <h5>We found  <strong>{{products?.length}} </strong>products in the <strong>{{categoryName}}</strong> category.</h5>   
+  </div>
+</div>
+
+<div class="card"  *ngIf="products?.length == 0" >
+  <div class="card-body">
+    <h5>Sorry, we found no products in the <strong>{{categoryName}}</strong> category.</h5>   
+  </div>
+</div>
+
+
+<div class="product-container" style="margin-top: 20px;">
+  <div class="row card-group">
+    <div class="col-md-3" *ngFor="let product of products">
+      <div class="card" style="margin-top: 10px;">
+
+        <div class="card-body">
+          <h5 class="card-title">{{product.name}}</h5>
+          <p class="card-text">
+            {{product.desc}}
+          </p>
+        </div>
+        <div class="card-footer">
+          <small class="text-muted">{{product.price | currency}}</small>
+          <small class="float-end" *ngIf="product.quantity > 0">
+            <label class="label label-{{product.quantity < 15 ? 'warning' : 'primary'}}">
+              {{product.quantity}} left!
+            </label>
+          </small>
+          <small class="text-muted float-end" *ngIf="product.quantity <= 0">
+            Inventory unavailable
+          </small>
+        </div>
+      </div>
+    </div>
+
+</div>
+
