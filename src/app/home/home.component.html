@@ -1,28 +1,28 @@
 <!-- Section: Design Block -->
 <section class="text-center">
-  <div class="card mx-4 mx-md-5 shadow-5-strong homePage">
-    <div class="card-body py-5 px-md-5">
-
-      <div class="row d-flex justify-content-center">
-        <div class="col-lg-8">
-          <h2 class="fw-bold mb-5">Globex. Your coolstore </h2>
-          <div class="h4" *ngIf="!this.isUserAuthenticated()">
-            Get all you cool stuff here!! Login to proceed!
+    <div class="card mx-4 mx-md-5 shadow-5-strong homePage">
+      <div class="card-body py-5 px-md-5">
+  
+        <div class="row d-flex justify-content-center">
+          <div class="col-lg-8">
+            <h2 class="fw-bold mb-5">Globex. Your coolstore </h2>
+            <div class="h4" *ngIf="!coolstoreCookiesService.user.isUserLoggedIn">
+              Get all you cool stuff here!! Login to proceed!
+            </div>
+            <span class="h4" *ngIf="coolstoreCookiesService.user.isUserLoggedIn">
+              Welcome back!! 
+              
+              <br><br><br><br>
+              
+              
+              <a type="button" class="btn btn-primary btn-lg" style="padding-left: 2.5rem; padding-right: 2.5rem;" routerLink="/categories" >
+                View the categories
+              </a>
+            </span>
           </div>
-          <span class="h4" *ngIf="this.isUserAuthenticated()">
-            Welcome back!! 
-            
-            <br><br><br><br>
-            
-            
-            <a type="button" class="btn btn-primary btn-lg" style="padding-left: 2.5rem; padding-right: 2.5rem;" routerLink="/categories" >
-              Click to wiew the categories
-            </a>
-          </span>
         </div>
       </div>
     </div>
-  </div>
-</section>
-    <!-- Section: Design Block -->
-        
+  </section>
+      <!-- Section: Design Block -->
+          

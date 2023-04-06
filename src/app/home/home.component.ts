@@ -1,5 +1,5 @@
-import { Component, OnInit, Output } from '@angular/core';
-import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { Component, Output } from '@angular/core';
+import { CoolstoreCookiesService } from '../coolstore-cookies.service';
 import { LoginService } from '../login.service';
 
 @Component({
@@ -7,20 +7,16 @@ import { LoginService } from '../login.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent  implements OnInit{  
+export class HomeComponent  {
+  
+  loginService:LoginService;
+  coolstoreCookiesService:CoolstoreCookiesService;
 
-  loginService: LoginService;
-  constructor( private oidcSecurityService:OidcSecurityService, loginService: LoginService) { 
+  constructor(loginService:LoginService, coolstoreCookiesService:CoolstoreCookiesService ) { 
     this.loginService = loginService;
+    this.coolstoreCookiesService = coolstoreCookiesService;
   }
 
   pageViewType = 'homePage';
-  ngOnInit() {
-    
-  }
-
-  isUserAuthenticated(): boolean {
-    return this.loginService.isUserAuthenticated();
-  }
 
 }

@@ -1,16 +1,17 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { PaginatedProductsList, Product } from '../models/product.model';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Product } from '../models/product.model';
 import serverEnvConfig from "client.env.config";
 import { OidcSecurityService } from 'angular-auth-oidc-client';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ProductsService } from '../services/products.service';
+import { ActivatedRoute } from '@angular/router';
+import { CoolStoreProductsService } from '../coolstore-products.service';
+import { CoolstoreCookiesService } from '../coolstore-cookies.service';
+
 @Component({
   selector: 'app-products',
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css']
 })
+
 export class ProductsComponent {
   isUserAuthenticated:boolean=false;
   searchedProduct: any;
@@ -23,7 +24,7 @@ export class ProductsComponent {
   page = 1;
 
   constructor(private oidcSecurityService:OidcSecurityService, private route: ActivatedRoute,
-    @Inject(PLATFORM_ID) platformId:string, private productsService:ProductsService ) {
+    @Inject(PLATFORM_ID) platformId:string, private productsService:CoolStoreProductsService , private coolstoreCookiesService:CoolstoreCookiesService ) {
       this.isUserAuthenticated = false;
   }
   
@@ -40,7 +41,8 @@ export class ProductsComponent {
   
 
   fetchProductByCategory(categoryName:String) {
-    this.productsService.fetchProducyByCategory(categoryName)
+    const custId = this.coolstoreCookiesService.user.name;
+    this.productsService.fetchProducyByCategory(categoryName, custId)
       .subscribe(products => (this.products = products));
   }
 

@@ -177,7 +177,6 @@
   },
   "defaultProject": "globex-mobile",
   "cli": {
-    "defaultCollection": "@angular-eslint/schematics",
-    "analytics": false
+    "defaultCollection": "@angular-eslint/schematics"
   }
 }
