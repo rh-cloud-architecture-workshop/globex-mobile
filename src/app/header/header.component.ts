@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CoolstoreCookiesService } from '../coolstore-cookies.service';
 import { LoginService } from '../login.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CustomerService } from '../customer.service';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { Router } from '@angular/router';
 import { catchError, Observable, of } from 'rxjs';
@@ -16,7 +17,9 @@ export class HeaderComponent  implements OnInit{
 
   coolstoreCookiesService: CoolstoreCookiesService;
   loginService: LoginService
+  customerService: CustomerService
   isMenuCollapsed:boolean;
+  isUserAuthenticated:boolean;
   userData: any;
   loginData: {}
   loginErrorMessage:string;
@@ -24,10 +27,11 @@ export class HeaderComponent  implements OnInit{
 
 
   constructor(coolstoreCookiesService: CoolstoreCookiesService, loginService: LoginService,
-    private formBuilder: FormBuilder, private oidcSecurityService:OidcSecurityService,
+    customerService: CustomerService, private formBuilder: FormBuilder, private oidcSecurityService:OidcSecurityService,
     private router: Router, httpErrorHandler: HttpErrorHandler) {
-        this.coolstoreCookiesService = coolstoreCookiesService;
+    this.coolstoreCookiesService = coolstoreCookiesService;
     this.loginService = loginService;
+    this.customerService = customerService;
     this.handleError = httpErrorHandler.createHandleError('HeaderComponent');
   }
 
@@ -37,18 +41,20 @@ export class HeaderComponent  implements OnInit{
     this.oidcSecurityService
       .checkAuth()
       .subscribe(({ isAuthenticated, accessToken, userData }) => {
-        catchError(this.handleError('oidcSecurityService', "checkAuth"));
+        catchError(this.handleError('oidcSecurityService', "checkAuth"))
         if (isAuthenticated) {
           this.navigateToStoredEndpoint();
+          this.isUserAuthenticated = isAuthenticated;
           this.login(userData["preferred_username"], accessToken);
-          this.router.navigateByUrl('/categories');
-        } else {
-          this.loginService.setUserAuthenticated('', false);
-          this.coolstoreCookiesService.resetUser();
         }
       });
   }
 
+  retrieveUserDetailsFromCookie() {
+    return this.coolstoreCookiesService.retrieveUserDetailsFromCookie();
+  }
+
+ 
 
   //login code
   showModal: boolean;
@@ -64,36 +70,54 @@ export class HeaderComponent  implements OnInit{
   currentRoute:string;
   
   authenticateUser() {
+    console.log("this.router.url", this.router.url)
     this.currentRoute = this.router.url;
     this.write('redirect', this.router.url);
     
     this.oidcSecurityService.authorize();
     
-    
   }
 
-  login(username: string, accessToken: string) {
+  login(username, accessToken) {
     this.loginService.login(username, accessToken)
-      .subscribe(success => {        
-        
+      .subscribe(success => {
+        console.log("go to ", this.router.url)        
+        if (success) {
+          this.coolstoreCookiesService.setUserFromCookies();          
+        } else {
+          this.showModal = true;
+        }
       });
   }
 
   logout() {
     this.oidcSecurityService.logoff().subscribe((result) =>  { 
+      console.log(result);
+      this.isUserAuthenticated = false;
       this.loginService.logout()
       .subscribe(success => {
-        this.coolstoreCookiesService.resetUser();        
+        this.coolstoreCookiesService.resetUser();
+        this.loginForm.reset();
       }); 
     }
-    );     
+    );
+     
   }
 
-  isUserAuthenticated(): boolean {
-    return this.loginService.isUserAuthenticated();
+  // convenience getter for easy access to form fields
+  get f() { return this.loginForm.controls; }
+  onSubmit() {
+    this.submitted = true;
+    // stop here if form is invalid
+    if (this.loginForm.invalid) {
+        return;
+    }
+    if(this.submitted)
+    {
+      this.showModal = false;
+    }
   }
 
-  
 
   //these methods help to navigate back to the place from where login was initiated
   //the path is stored in localstorage
@@ -112,7 +136,9 @@ export class HeaderComponent  implements OnInit{
   }
 
   private read(key: string): any {
+    console.log("localStorage", localStorage)
     const data = localStorage.getItem(key);
+    console.log("data", data)
     if (data != null) {
       return JSON.parse(data);
     }

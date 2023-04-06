@@ -8,7 +8,7 @@ import { AppServerModule } from './src/main.server';
 import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
 
-import { PaginatedProductsList, Product } from 'src/app/models/product.model';
+import { PaginatedProductsList } from 'src/app/models/product.model';
 import { AxiosError } from 'axios';
 
 import { get } from 'env-var';
@@ -16,7 +16,7 @@ import { get } from 'env-var';
 import { v4 as uuidv4 } from 'uuid';
 import { LogLevel } from 'angular-auth-oidc-client';
 
-import { Category } from 'src/app/models/category.model';
+
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -26,28 +26,28 @@ export function app(): express.Express {
   const distFolder = join(process.cwd(), 'dist/globex-mobile/browser');
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
-  // HTTP and WebSocket traffic both use this port
-  const NODE_ENV = get('NODE_ENV').default('dev').asEnum(['dev', 'prod']);
-  const LOG_LEVEL = get('LOG_LEVEL').asString();
-
-  const  PORT = get('PORT').default(4200).asPortNumber();
 
   //setup pathways
   //client UI to SSR calls
-  const ANGULR_API_GETPAGINATEDPRODUCTS =  '/api/getPaginatedProducts';
   const ANGULR_HEALTH = '/health';
   const ANGULR_API_LOGIN = '/api/login';
+  const ANGULR_API_CUSTOMER = '/api/customer';
   const ANGULAR_API_AUTHCONFIG = '/api/getAuthConfig';
-  const ANGULR_API_GETCATEGORIES = '/api/getCategories';
-  const ANGULR_API_GETPRODUCTSBYCATEGORY = '/api/prodByCategoryUrl';
 
-  
-  
+  const GLOBEX_MOBILE_GATEWAY = get('GLOBEX_MOBILE_GATEWAY').asString();
+
+  const NODE_ENV = get('NODE_ENV').default('dev').asEnum(['dev', 'prod']);
+  const LOG_LEVEL = get('LOG_LEVEL').asString();
+
+
+  // HTTP and WebSocket traffic both use this port
+  const  PORT = get('PORT').default(4200).asPortNumber();
+
   // external micro services typically running on OpenShift
   const API_MANAGEMENT_FLAG = get('API_MANAGEMENT_FLAG').default("NO").asString();
-  const API_GET_PAGINATED_PRODUCTS = get('API_GET_PAGINATED_PRODUCTS').default('http://3ea8ea3c-2bc9-45ae-9dc9-73aad7d8eafb.mock.pstmn.io/services/products').asString();
   const API_CUSTOMER_SERVICE = get('API_CUSTOMER_SERVICE').default('').asString();
-  const GLOBEX_MOBILE_GATEWAY = get('GLOBEX_MOBILE_GATEWAY').asString();
+  const ANGULR_API_GETCATEGORIES = '/api/getCategories';
+  const ANGULR_API_GETPRODUCTSBYCATEGORY = '/api/prodByCategoryUrl';
 
   //setup keycloak auth settings
   const API_CLIENT_ID = get('API_CLIENT_ID').default('').asString();
@@ -55,6 +55,12 @@ export function app(): express.Express {
   const SSO_REDIRECT_LOGOUT_URI = get('SSO_REDIRECT_LOGOUT_URI').default('').asString();
   const SSO_LOG_LEVEL = get('SSO_LOG_LEVEL').default(LogLevel.Error).asString();
   
+  
+  
+  //3SCALE INTEGRATION FOR AUTH KEY BASED AUTHENTICATION
+  const API_USER_KEY_NAME = get('USER_KEY').default('api_key').asString();
+  const API_USER_KEY_VALUE = get('API_USER_KEY_VALUE').default('8efad5cc78ecbbb7dbb8d06b04596aeb').asString();
+
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
   server.engine('html', ngExpressEngine({
     bootstrap: AppServerModule
@@ -63,13 +69,19 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', distFolder);
 
+
   
+
 
   // Example Express Rest API endpoints
   //const http = require('http');
   const bodyParser = require('body-parser');
   const cookieParser = require('cookie-parser')
   const axios = require('axios');
+
+  if(API_MANAGEMENT_FLAG && API_MANAGEMENT_FLAG =='YES') {
+    axios.defaults.headers.common[API_USER_KEY_NAME] = API_USER_KEY_VALUE // for all requests
+  }
 
   server.use(bodyParser.json());
   server.use(cookieParser())
@@ -79,11 +91,9 @@ export function app(): express.Express {
   const sessions = new Map<string, Session>();
   const accessTokenSessions = new Map<string, Session>();
 
-  //Access Token parsing
-  var Buffer = require('buffer').Buffer;
-
 
   //API Setup START
+  //Get Paginated Products
   server.get(ANGULAR_API_AUTHCONFIG, (req, res) => {
     res.send(
       {
@@ -96,35 +106,21 @@ export function app(): express.Express {
       );
   });
 
-  server.get(ANGULR_API_GETPAGINATEDPRODUCTS, (req, res) => {
-    var getProducts:PaginatedProductsList;
-    var myTimestamp = new Date().getTime().toString();
-    var url = API_GET_PAGINATED_PRODUCTS.toString();
-    var limit = req.query['limit'];
-    var page = req.query['page'];
-
-    axios.get(url, {params: { limit: limit, timestamp:myTimestamp , page: page } })
-      .then(response => {
-        getProducts =  response.data;;
-        res.send(getProducts);
-      })
-      .catch(error => {
-        console.log("ANGULR_API_GETPAGINATEDPRODUCTS", error);
-      });
-  });
-
+ 
 
   // POST LOGIN API Call
   server.post(ANGULR_API_LOGIN, (req, res) => {
-    const accessToken: string = req.body.accessToken;
-    const accessTokenPart: string = accessToken.split('.')[1];
-    const decoded: any = JSON.parse(Buffer.from(accessTokenPart, 'base64').toString());
-    const sessionToken: string = decoded.sid;
-    const sessionExpiresAt: number = decoded.exp * 1000;
-    sessions.set(sessionToken, new Session(decoded.preferred_username, sessionExpiresAt, accessToken));
-    accessTokenSessions.set(sessionToken, req.body.accessToken);
-    res.cookie("globex_session_token", sessionToken, { expires: new Date(sessionExpiresAt), sameSite: 'lax' });
-    res.status(200).send({"success": true});
+    
+        const sessionToken = uuidv4();
+        const now = new Date()
+        const sessionExpiresAt = new Date(+now + 3600 * 1000)
+        const userExpiresAt = new Date(+now + 3600 * 48 * 1000)
+        sessions.set(sessionToken, new Session(req.body.username, sessionExpiresAt));
+        res.cookie("globex_session_token", sessionToken, { expires: sessionExpiresAt, sameSite: 'lax' });
+        res.cookie("globex_user_id", req.body.username, {expires: userExpiresAt, sameSite: 'lax'});
+        accessTokenSessions.set(sessionToken, req.body.accessToken);
+        res.status(200).send({"success": true});        
+      
   });
 
   // DELETE LOGIN API Call
@@ -143,43 +139,74 @@ export function app(): express.Express {
     res.status(204).send();
   });
 
-  
-  server.get(ANGULR_API_GETCATEGORIES, async (req, res) => {
+  // GET CUSTOMER INFO API CALL
+  server.get(ANGULR_API_CUSTOMER + '/:custId', (req, res) => {
     const sessionToken = req.cookies['globex_session_token']
-    const tokenStr = accessTokenSessions.get(sessionToken);
-    var categories: Category[];
-    var url = GLOBEX_MOBILE_GATEWAY + "/mobile/services/category/list";
+    const custId = req.params.custId;
     
-    axios.get(url, { headers: {"Authorization" : `Bearer ${tokenStr}`} })
-      .then(response => {
-        categories = response.data;;
-        res.send(categories);
-      })
+    if (!validateSession(sessions, sessionToken, custId)) {
+      res.status(401).send();
+      return;
+    }
+    axios.get(API_CUSTOMER_SERVICE.replace(':custId', custId))
+      .then(response => res.status(200).send(response.data))
       .catch(error => {
-        console.log("ANGULR_API_GETCATEGORIES", error);
-      }); 
-  });
-
-  server.get(ANGULR_API_GETPRODUCTSBYCATEGORY + '/:categoryName', async (req, res) => {
-    let categoryName = req.params.categoryName;
-    const sessionToken = req.cookies['globex_session_token']
-    const tokenStr = accessTokenSessions.get(sessionToken);
-    
-    var productsList: Product[];
-    var url = GLOBEX_MOBILE_GATEWAY + "/mobile/services/product/category/" + categoryName;
-    
-    axios.get(url, { headers: {"Authorization" : `Bearer ${tokenStr}`} })
-      .then(response => {
-        productsList = response.data;;
-        res.send(productsList);
-      })
-      .catch(error => {
-        console.log("ANGULR_API_GETCATEGORIES", error);
+        if (error.response && error.response.status == 404) {
+          res.status(error.response.status).send()
+        } else {
+          console.log("ANGULR_API_CUSTOMER", error);
+          res.status(500).send();
+        }
       });
+
   });
 
+  // GET CATEGORIES LIST
+  server.get(ANGULR_API_GETCATEGORIES + '/:custId', (req, res) => {
+    const sessionToken = req.cookies['globex_session_token']
+    const configHeader = {
+      headers: { Authorization: `Bearer ${accessTokenSessions.get(sessionToken)}` }
+    };
+    const custId = req.params.custId;
+    if (!validateSession(sessions, sessionToken, custId)) {
+      res.status(401).send();
+      return;
+    }
+    var url = GLOBEX_MOBILE_GATEWAY + "/mobile/services/category/list";
+    axios.get(url, configHeader)
+      .then(response => {
+        res.status(200).send(response.data)
+      })
+      .catch(error => {
+        console.log("ANGULR_API_GETCATEGORIES", error);
+        res.status(500).send();
+      })
+  });
 
-  
+  // GET PRODUCTS FOR CATEGORY
+  server.get(ANGULR_API_GETPRODUCTSBYCATEGORY + '/:categoryName/:custId', (req, res) => {
+    const sessionToken = req.cookies['globex_session_token']
+    const configHeader = {
+      headers: { Authorization: `Bearer ${accessTokenSessions.get(sessionToken)}` }
+    };
+    let custId = req.params.custId;
+    let categoryName = req.params.categoryName;
+
+    if (!validateSession(sessions, sessionToken, custId)) {
+      res.status(401).send();
+      return;
+    }
+    var url = GLOBEX_MOBILE_GATEWAY + "/mobile/services/product/category/" + categoryName;
+    axios.get(url, configHeader)
+      .then(response => {
+        res.status(200).send(response.data)
+      })
+      .catch(error => {
+        console.log("ANGULR_API_GETCATEGORIES", error);
+        res.status(500).send();
+      })
+  });
+
 
 //API Setup END
 
@@ -266,25 +293,19 @@ function run(): void {
 class Session {
 
   private username: String;
-  private expiresAt: number;
-  private accessToken: String;
+  private expiresAt: Date;
 
-  constructor(username: String, expiresAt: number, accessToken: any) {
-    this.username = username;
-    this.expiresAt = expiresAt;
-    this.accessToken = accessToken;
+  constructor(username, expiresAt) {
+    this.username = username
+    this.expiresAt = expiresAt
 }
 
   isExpired(): boolean {
-    return this.expiresAt < Date.now();
+    return this.expiresAt < (new Date())
   }
 
   isOwnedBy(user: String) {
     return this.username == user;
-  }
-
-  getAccessToken(): String {
-    return this.accessToken;
   }
 }
 
