@@ -25,7 +25,7 @@ import { AuthConfigModule } from './auth-config.module';
 import { filter } from 'rxjs';
 import { CategoryComponent } from './category/category.component';
 import { ProductsComponent } from './products/products.component';
-
+import { DummyAuthPopUpService } from './dummy-auth-popup.service';
 
 export function initConfig(appConfig: AppConfigService) {
   return () => appConfig.loadConfig();
@@ -52,7 +52,7 @@ export function initConfig(appConfig: AppConfigService) {
       provide: APP_INITIALIZER, useFactory: initConfig,  deps: [AppConfigService],  multi: true
     },
     CoolStoreProductsService, LogService, CookieService, HttpErrorHandler, MessageService, 
-    CoolstoreCookiesService, LoginService, CustomerService, OidcSecurityService
+    CoolstoreCookiesService, LoginService, CustomerService, OidcSecurityService, DummyAuthPopUpService
   ],
   bootstrap: [AppComponent]
 })

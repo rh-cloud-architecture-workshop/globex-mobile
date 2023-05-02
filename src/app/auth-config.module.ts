@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, NgModule, PLATFORM_ID } from '@angular/core';
-import { AuthModule, StsConfigHttpLoader, StsConfigLoader } from 'angular-auth-oidc-client';
+import { AuthModule, PopUpService, StsConfigHttpLoader, StsConfigLoader } from 'angular-auth-oidc-client';
 import config from 'client.env.config';
 import { map } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { DummyAuthPopUpService } from './dummy-auth-popup.service';
 
 let platform: string;
 export function setPlatform(value) {
@@ -51,6 +52,9 @@ export const httpLoaderFactory = (httpClient: HttpClient) => {
     }),
   ],
   exports: [AuthModule],
+  providers:[
+    { provide: PopUpService, useClass: DummyAuthPopUpService }
+  ],
 })
 export class AuthConfigModule {
   isBrowser(): boolean {
