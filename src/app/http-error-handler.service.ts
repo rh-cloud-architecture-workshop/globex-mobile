@@ -28,7 +28,7 @@ export class HttpErrorHandler {
    * @param result - optional value to return as the observable result
    */
   handleError<T>(serviceName = '', operation = 'operation', result = {} as T) {
-
+    this.messageService.clear();
     return (error: HttpErrorResponse): Observable<T> => {
       // TODO: send the error to remote logging infrastructure
       console.error(error); // log to console instead
@@ -38,7 +38,7 @@ export class HttpErrorHandler {
        `server returned code ${error.status} with body "${error.error}"`;
 
       // TODO: better job of transforming error for user consumption
-      this.messageService.add(`${serviceName}: ${operation} failed: ${message}`);
+      this.messageService.add(JSON.stringify(error));
 
       // Let the app keep running by returning a safe result.
       return of( result );

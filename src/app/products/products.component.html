@@ -1,3 +1,9 @@
+<div class="alert alert-danger" role="alert" *ngIf="errorMessage && errorMessage!=null">
+  We are sorry, but an error has occurred. <br>
+  <strong>Error Status Code:</strong> {{ errorMessage.status }} <br>
+  <strong>Error Status Text:</strong> {{ errorMessage.statusText }}
+</div>
+<div *ngIf="!(errorMessage && errorMessage!=null)">
 <div class="card"  *ngIf="products?.length > 0" >
   <div class="card-body">
     <h5>We found  <strong>{{products?.length}} </strong>products in the <strong>{{categoryName}}</strong> category.</h5>   
@@ -13,7 +19,7 @@
 
 <div class="product-container" style="margin-top: 20px;">
   <div class="row card-group">
-    <div class="col-md-3" *ngFor="let product of products">
+    <div class="col-lg-4 d-flex align-items-stretch" *ngFor="let product of products">
       <div class="card" style="margin-top: 10px;">
 
         <div class="card-body">
@@ -38,3 +44,4 @@
 
 </div>
 
+</div>

@@ -178,8 +178,8 @@ export function app(): express.Express {
         res.status(200).send(response.data)
       })
       .catch(error => {
-        console.log("ANGULR_API_GETCATEGORIES", error);
-        res.status(500).send();
+        console.log("ANGULR_API_GETCATEGORIES", error.response);
+        res.status(error.response.status).send();
       })
   });
 
@@ -202,8 +202,8 @@ export function app(): express.Express {
         res.status(200).send(response.data)
       })
       .catch(error => {
-        console.log("ANGULR_API_GETCATEGORIES", error);
-        res.status(500).send();
+        console.log("ANGULR_API_GETPRODUCTSBYCATEGORY", error.response);
+        res.status(error.response.status).send();
       })
   });
 

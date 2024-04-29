@@ -1,4 +1,10 @@
-<div class="card" style="margin-top: 40px;">
+<div class="alert alert-danger" role="alert" *ngIf="errorMessage && errorMessage!=null">
+  We are sorry, but an error has occurred. <br>
+  <strong>Error Status Code:</strong> {{ errorMessage.status }} <br>
+  <strong>Error Status Text:</strong> {{ errorMessage.statusText }}
+</div>
+
+<div class="card" style="margin-top: 40px;" *ngIf="!(errorMessage && errorMessage!=null)">
   <div class="card-header">
     <div class="h4 "> Choose a category</div>
   </div>

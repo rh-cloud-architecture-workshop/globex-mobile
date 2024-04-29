@@ -5,7 +5,7 @@ import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { Router } from '@angular/router';
 import { CoolStoreProductsService } from '../coolstore-products.service';
 import { CoolstoreCookiesService } from '../coolstore-cookies.service';
-
+import { MessageService } from '../message.service';
 
 @Component({
   selector: 'app-catalogue-list',
@@ -16,18 +16,20 @@ export class CategoryComponent implements OnInit{
 
   isUserAuthenticated:boolean=false;
   searchedProduct: any;
-
+  errorMessage:any;
   testBrowser: boolean = true;
   products = new PaginatedProductsList();
   paginationLimit = serverEnvConfig.ANGULR_API_GETPAGINATEDPRODUCTS_LIMIT; //number of products per page
 
   page = 1;
   custId: string;
-
+  private messageService:MessageService;
 
   constructor(private oidcSecurityService:OidcSecurityService, private router: Router,
+    @Inject(MessageService) messageService:MessageService,
     @Inject(PLATFORM_ID) platformId:string, private productsService:CoolStoreProductsService, private coolstoreCookiesService:CoolstoreCookiesService ) {
     this.isUserAuthenticated = false;
+    this.messageService = messageService;
 
 
 
@@ -49,9 +51,11 @@ export class CategoryComponent implements OnInit{
   fetchCatalogueList() {
     const custId = this.coolstoreCookiesService.user.name;
     this.productsService.fetchCategories(custId)
-      .subscribe(catalogueList => (
-        this.categoriesList = catalogueList
-        ));
+      .subscribe(catalogueList => {
+          this.categoriesList = catalogueList;
+          this.errorMessage = JSON.parse(this.messageService.get())
+        }
+      );
   }
 
   viewProductsByCategory(catName) {

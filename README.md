@@ -42,6 +42,13 @@ export SSO_LOG_LEVEL=2
 
 
 
+export GLOBEX_MOBILE_GATEWAY=https://globex-mobile-gateway-product-3scale-user1-apicast-production.apps.cluster-nrf9f.dynamic.redhatworkshops.io:443
+export API_CLIENT_ID=5b76c398
+export SSO_AUTHORITY=https://sso.apps.cluster-nrf9f.dynamic.redhatworkshops.io/realms/globex-user1
+export SSO_REDIRECT_LOGOUT_URI=http://localhost:4200/home
+export SSO_LOG_LEVEL=2
+
+
 ## docker
-docker build . -t	quay.io/globex-recommendation/globex-recommendation-ui:<checkin-tag>
-docker push quay.io/globex-recommendation/globex-recommendation-ui:<checkin-tag>
+podman build . -t	quay.io/globex-recommendation/globex-recommendation-ui:<checkin-tag>
+podman push quay.io/globex-recommendation/globex-recommendation-ui:<checkin-tag>

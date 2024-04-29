@@ -5,6 +5,7 @@ import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { ActivatedRoute } from '@angular/router';
 import { CoolStoreProductsService } from '../coolstore-products.service';
 import { CoolstoreCookiesService } from '../coolstore-cookies.service';
+import { MessageService } from '../message.service';
 
 @Component({
   selector: 'app-products',
@@ -15,17 +16,19 @@ import { CoolstoreCookiesService } from '../coolstore-cookies.service';
 export class ProductsComponent {
   isUserAuthenticated:boolean=false;
   searchedProduct: any;
-  
+  errorMessage:any;
   categoryName:String;
   testBrowser: boolean = true;
   products:Product[];
   paginationLimit = serverEnvConfig.ANGULR_API_GETPAGINATEDPRODUCTS_LIMIT; //number of products per page
-
+  private messageService:MessageService;
   page = 1;
 
   constructor(private oidcSecurityService:OidcSecurityService, private route: ActivatedRoute,
+    @Inject(MessageService) messageService:MessageService,
     @Inject(PLATFORM_ID) platformId:string, private productsService:CoolStoreProductsService , private coolstoreCookiesService:CoolstoreCookiesService ) {
       this.isUserAuthenticated = false;
+      this.messageService = messageService;
   }
   
   ngOnInit(): void {
@@ -43,7 +46,10 @@ export class ProductsComponent {
   fetchProductByCategory(categoryName:String) {
     const custId = this.coolstoreCookiesService.user.name;
     this.productsService.fetchProducyByCategory(categoryName, custId)
-      .subscribe(products => (this.products = products));
+      .subscribe(products => {
+        this.products = products;
+        this.errorMessage = JSON.parse(this.messageService.get());
+      });
   }
 
   
