@@ -1,27 +1,6 @@
-# GlobexUi
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.5.
-This also has "Server-side rendering (SSR) with Angular Universal" enables. Read more about this here: https://angular.io/guide/universal
-
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Running on Server Side
+## Running on Local PC
 
 Run `npm run dev:ssr` for running this as server side app. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 
 
 ## Env variables needed
@@ -35,20 +14,13 @@ export API_CART_SERVICE="http://localhost:9000/services/cart"
 export API_CUSTOMER_SERVICE="http://localhost:9000/services/customer/id/:custId"
 export API_ORDER_SERVICE="http://localhost:8080/web-gateway/services/order"
 
-export SSO_CUSTOM_CONFIG="globex-web-gateway"
-export SSO_AUTHORITY="http://localhost:8180/realms/user1-globex_users"
-export SSO_REDIRECT_LOGOUT_URI="http://localhost:4200/home"
-export SSO_LOG_LEVEL=2
-
-
-
-export GLOBEX_MOBILE_GATEWAY=https://globex-mobile-gateway-product-3scale-user1-apicast-production.apps.cluster-nrf9f.dynamic.redhatworkshops.io:443
+export GLOBEX_MOBILE_GATEWAY=<https://globex-mobile-gateway-product-3scale-user1-apicast-production.apps.cluster-xyz.dynamic.redhatworkshops.io:443>
 export API_CLIENT_ID=5b76c398
-export SSO_AUTHORITY=https://sso.apps.cluster-nrf9f.dynamic.redhatworkshops.io/realms/globex-user1
+export SSO_AUTHORITY=https://sso.apps.cluster-xyz.dynamic.redhatworkshops.io/realms/globex-user1
 export SSO_REDIRECT_LOGOUT_URI=http://localhost:4200/home
 export SSO_LOG_LEVEL=2
 
 
 ## docker
-podman build . -t	quay.io/globex-recommendation/globex-recommendation-ui:<checkin-tag>
-podman push quay.io/globex-recommendation/globex-recommendation-ui:<checkin-tag>
+podman build . -t quay.io/cloud-architecture-workshop/globex-mobile:<checkin-tag>
+podman push quay.io/cloud-architecture-workshop/globex-mobile:<checkin-tag>
