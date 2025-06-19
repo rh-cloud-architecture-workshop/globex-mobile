@@ -15,7 +15,7 @@ export function getPlatform() {
 }
 
 export const httpLoaderFactory = (httpClient: HttpClient) => {
-  //if(getPlatform()=='browser') 
+  //if(getPlatform()=='browser')
   {
   const config$ = httpClient.get<any>(config.ANGULAR_API_AUTHCONFIG).pipe(
     map((customConfig: any) => {
@@ -27,17 +27,17 @@ export const httpLoaderFactory = (httpClient: HttpClient) => {
         logLevel: customConfig[config.SSO_LOG_LEVEL_KEY],
         postLoginRoute: '/home',
         historyCleanupOff: true,
-        scope: 'openid profile email offline_access',
-        responseType: 'id_token token',        
+        scope: 'openid profile email',
+        responseType: 'id_token token',
         silentRenew: true,
-        useRefreshToken: true        
+        useRefreshToken: true
       };
     })
   );
   return new StsConfigHttpLoader(config$);
 }
 //return null;
-  
+
 };
 
 
